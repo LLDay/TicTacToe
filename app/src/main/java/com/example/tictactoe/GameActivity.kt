@@ -2,6 +2,7 @@ package com.example.tictactoe
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -15,17 +16,32 @@ class GameActivity : AppCompatActivity(), LifecycleOwner {
     lateinit var player1: APlayer
     lateinit var player2: APlayer
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // dark mode
+        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES)
+            setTheme(R.style.DarkTheme)
+        else
+            setTheme(R.style.AppTheme)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.session_layout)
 
-//        val bundle = intent.getBundleExtra("players")!!
-//        val player1 = bundle["player_1"] as APlayer
-//        val player2 = bundle["player_2"] as APlayer
-        this.player1 = LocalPlayer() //TODO(must be send within bundle!)
-        this.player2 = player1
+        when (intent.getSerializableExtra("SessionType") as SessionType) {
+            SessionType.TWO_ON_ONE -> {
+                player1 = LocalPlayer()
+                player2 = player1
+            }
+            SessionType.TWO_ON_TWO -> {
+
+            }
+        }
+
         session = Session(player1, player2)
         lifecycle.addObserver(session)
     }
 
+    enum class SessionType {
+        TWO_ON_ONE, TWO_ON_TWO
+    }
 }

@@ -8,7 +8,7 @@
     <color name="primaryDark">#223D53</color>
     <color name="primaryDarkD">#142430</color>
     <color name="backgroundLight">#E4E4E4</color>
-    <color name="backgroundDark">#202F3F</color>
+    <color name="backgroundDark">#14181F</color>
     <color name="fieldLight">#E0E5E9</color>
     <color name="fieldDark">#333338</color>
 </resources>

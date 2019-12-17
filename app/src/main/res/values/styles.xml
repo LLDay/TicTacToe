@@ -8,6 +8,7 @@
         <item name="backgroundColor">@color/backgroundLight</item>
         <item name="fieldCellColor">@color/fieldLight</item>
         <item name="colorControlActivated">@color/primaryDark</item>
+        <item name="cellBackground">@drawable/menu_background_light</item>
     </style>
 
     <style name="DarkTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -19,6 +20,7 @@
         <item name="backgroundColor">@color/backgroundDark</item>
         <item name="fieldCellColor">@color/fieldDark</item>
         <item name="colorControlActivated">@color/primaryDark</item>
+        <item name="cellBackground">@drawable/menu_background_dark</item>
     </style>
 
     <style name="WindowAnimationTransition">

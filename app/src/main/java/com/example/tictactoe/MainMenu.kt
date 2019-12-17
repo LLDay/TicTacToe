@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.tictactoe.logic.LocalPlayer
+import com.example.tictactoe.logic.Session
 
 class MainMenu : AppCompatActivity() {
 
@@ -33,23 +34,13 @@ class MainMenu : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             else
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
-//            val restartIntent = Intent(applicationContext, MainMenu::class.java)
-//            startActivity(restartIntent)
-//            finish()
             recreate()
         }
 
         // buttons
         findViewById<Button>(R.id.new_game_button).setOnClickListener {
-            val players = Bundle()
-            val player = LocalPlayer()
-
-//            players.putSerializable("player_1", player)
-//            players.putSerializable("player_2", player)
-
             val intent = Intent(this, GameActivity::class.java)
-//            intent.putExtra("players", players)
+            intent.putExtra("SessionType", GameActivity.SessionType.TWO_ON_ONE)
             startActivity(intent)
         }
 

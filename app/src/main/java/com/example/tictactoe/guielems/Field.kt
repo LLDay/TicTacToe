@@ -67,7 +67,7 @@ class Field : Fragment(), SessionListener {
         layout.setBackgroundColor(Color.BLACK)
 
         for (i in 0 until fieldSize) {
-            val cell = Cell(context)
+            val cell = Cell(context!!)
             layout.addView(cell)
             cells.add(cell)
         }

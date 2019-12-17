@@ -4,9 +4,10 @@ import com.example.tictactoe.guielems.Field
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import java.io.Serializable
 
 abstract class APlayer : SessionListener {
-    private val channels = mutableListOf<Channel<Pair<Int, Int>>>()
+    protected val channels = mutableListOf<Channel<Pair<Int, Int>>>()
 
     fun move(x: Int, y: Int) =
         GlobalScope.launch {

@@ -11,6 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import java.io.Serializable
 
 
 class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
@@ -71,7 +72,7 @@ class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
 
     private suspend fun process() {
         while(job.isActive) {
-            val coords = if (xMoves) channel1.receive() else channel2.receive()
+            val coords = if (!xMoves) channel1.receive() else channel2.receive()
             moveTo(coords.first, coords.second)
             tryEndGame(coords.first, coords.second)
         }
