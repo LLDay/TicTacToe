@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GameActivity">
+    tools:context=".GameActivity"
+    android:background="?backgroundColor">
     <fragment
         android:id="@+id/field"
         android:name="com.example.tictactoe.guielems.Field"

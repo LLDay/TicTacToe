@@ -1,30 +1,37 @@
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/colorLight</item>
-        <item name="colorPrimaryDark">@color/colorWhite</item>
-        <item name="menuBackground">@drawable/menu_background_dark</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+        <item name="colorPrimary">@color/primaryLight</item>
+        <item name="colorPrimaryDark">@color/primaryLightD</item>
+        <item name="menuBackground">@drawable/menu_background_light</item>
+        <item name="textColor">@color/colorDark</item>
+        <item name="backgroundColor">@color/backgroundLight</item>
+        <item name="fieldCellColor">@color/fieldLight</item>
+        <item name="colorControlActivated">@color/primaryDark</item>
     </style>
 
     <style name="DarkTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/colorDark</item>
-        <item name="colorPrimaryDark">@color/colorDark</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+        <item name="colorPrimary">@color/primaryDark</item>
+        <item name="colorPrimaryDark">@color/primaryDarkD</item>
         <item name="menuBackground">@drawable/menu_background_dark</item>
+        <item name="textColor">@color/colorLight</item>
+        <item name="backgroundColor">@color/backgroundDark</item>
+        <item name="fieldCellColor">@color/fieldDark</item>
+        <item name="colorControlActivated">@color/primaryDark</item>
+    </style>
+
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
     <style name="MenuButton">
         <item name="android:layout_height">80dp</item>
         <item name="android:layout_marginRight">30dp</item>
         <item name="android:layout_marginLeft">30dp</item>
-    </style>
-
-    <style name="LightMenuButton" parent="MenuButton">
-        <item name="android:textColor">@color/colorDark</item>
-        <item name="android:background">@color/colorLight</item>
-    </style>
-
-    <style name="DarkMenuButton" parent="MenuButton">
-        <item name="android:textColor">@color/colorLight</item>
-        <item name="android:background">@color/colorDark</item>
+        <item name="android:background">?backgroundColor</item>
+        <item name="android:textColor">?textColor</item>
     </style>
 
 </resources>
