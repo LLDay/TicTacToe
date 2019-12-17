@@ -16,8 +16,8 @@ class Session(player1: APlayer, player2: APlayer) {
     // Properties and fields
     //
 
-    private val channel1 = Channel<Pair<Int, Int>>()
-    private val channel2 = Channel<Pair<Int, Int>>()
+    val channel1 = Channel<Pair<Int, Int>>()
+    val channel2 = Channel<Pair<Int, Int>>()
 
     private val moveListeners = mutableListOf<SessionListener>()
     private var xMoves = true
@@ -25,7 +25,8 @@ class Session(player1: APlayer, player2: APlayer) {
     private val cells = Array(fieldSize) { Array(fieldSize) { CellStates.SPACE } }
 
     enum class CellStates { X, O, SPACE }
-    enum class MoveStatus { OK, NO, DRAW, X_WON, O_WON }
+    enum class MoveStatus { OK, NO }
+    enum class EndGameStatus { DRAW, X_WON, O_WON}
 
     val lastMove: CellStates
         get() = if (xMoves) CellStates.O else CellStates.X
@@ -52,6 +53,7 @@ class Session(player1: APlayer, player2: APlayer) {
         while(job.isActive) {
             val coords = if (xMoves) channel1.receive() else channel2.receive()
             moveTo(coords.first, coords.second)
+            tryEndGame(coords.first, coords.second)
         }
     }
 
@@ -77,35 +79,41 @@ class Session(player1: APlayer, player2: APlayer) {
     private fun moveTo(x: Int, y: Int) {
         if (cells[x][y] != CellStates.SPACE) {
             Log.d(globalTag, "Cannot move at $x:$y")
-            moveListeners.forEach { it.onMove(x, y, MoveStatus.NO) }
+            moveListeners.forEach { it.onMove(x, y, currentMove, MoveStatus.NO) }
             return
         }
 
         cells[x][y] = currentMove
         xMoves = !xMoves
-        var status = MoveStatus.OK
 
         Log.d(globalTag, "Move $lastMove at $x:$y")
+        moveListeners.forEach { it.onMove(x, y, lastMove, MoveStatus.OK) }
+    }
+
+    private fun tryEndGame(x: Int, y: Int) {
+        var endStatus: EndGameStatus?
+        endStatus = null
 
         if (isDraw()) {
             Log.d(globalTag, "Draw")
-            status = MoveStatus.DRAW
+            endStatus = EndGameStatus.DRAW
         }
+
         if (isSomeoneWins(x, y)) {
             Log.d(globalTag, "$lastMove won")
-            status = when (currentMove) {
-                CellStates.X -> MoveStatus.X_WON
-                CellStates.O -> MoveStatus.O_WON
+            endStatus = when (currentMove) {
+                CellStates.X -> EndGameStatus.X_WON
+                CellStates.O -> EndGameStatus.O_WON
                 else -> throw IllegalStateException("Current move cannot be undefined")
             }
         }
 
-        // Won or draw
-        if (status != MoveStatus.OK)
+        if (endStatus != null) {
             job.cancel()
-
-        moveListeners.forEach { it.onMove(x, y, status) }
+            moveListeners.forEach { it.onGameEnd(endStatus) }
+        }
     }
+
 
     private fun isSomeoneWins(x: Int, y: Int): Boolean {
         val winNumber = winNumber

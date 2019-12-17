@@ -6,10 +6,14 @@ import com.example.tictactoe.guielems.Field
 
 
 class LocalPlayer : APlayer() {
+    private var connected = false
+
     override fun connectField(field: Field) {
-        for (i in 0 until field.cells.size) {
-            field.cells[i].setOnClickListener(CellClickListener(i))
-        }
+        if (!connected)
+            for (i in 0 until field.cells.size) {
+                field.cells[i].setOnClickListener(CellClickListener(i))
+            }
+        connected = true
     }
 
     private inner class CellClickListener(absPos: Int)
