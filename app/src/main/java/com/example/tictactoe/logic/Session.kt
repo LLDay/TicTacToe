@@ -1,6 +1,9 @@
 package com.example.tictactoe.logic
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.example.tictactoe.GlobalParams.Companion.globalTag
 import com.example.tictactoe.GlobalParams.Companion.fieldSize
 import com.example.tictactoe.GlobalParams.Companion.winNumber
@@ -10,14 +13,14 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 
-class Session(player1: APlayer, player2: APlayer) {
+class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
 
     //
     // Properties and fields
     //
 
-    val channel1 = Channel<Pair<Int, Int>>()
-    val channel2 = Channel<Pair<Int, Int>>()
+    private val channel1 = Channel<Pair<Int, Int>>()
+    private val channel2 = Channel<Pair<Int, Int>>()
 
     private val moveListeners = mutableListOf<SessionListener>()
     private var xMoves = true
@@ -36,9 +39,26 @@ class Session(player1: APlayer, player2: APlayer) {
 
     var job: Job
 
+
+    //
+    //  Lifecycle
+    //
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    private fun saveStateToDB() {
+        Log.d(globalTag, "Load from db")
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun restoreStateFromDB() {
+        Log.d(globalTag, "Load to db")
+    }
+
+
     //
     //  Global logic
     //
+
 
     init {
         player1.addChannel(channel1)
@@ -101,7 +121,7 @@ class Session(player1: APlayer, player2: APlayer) {
 
         if (isSomeoneWins(x, y)) {
             Log.d(globalTag, "$lastMove won")
-            endStatus = when (currentMove) {
+            endStatus = when (lastMove) {
                 CellStates.X -> EndGameStatus.X_WON
                 CellStates.O -> EndGameStatus.O_WON
                 else -> throw IllegalStateException("Current move cannot be undefined")

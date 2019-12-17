@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/menu_background_dark">
-
+    android:background="@drawable/menu_background_light">
 
     <Button
         style="@style/LightMenuButton"
@@ -20,11 +19,11 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        style="@style/LightMenuButton"
         android:id="@+id/settings_button"
+        style="@style/LightMenuButton"
         android:layout_width="match_parent"
         android:layout_marginBottom="120dp"
-        android:text="Settings"
+        android:text="STATISTIC"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/multiplayer_button"
         tools:layout_editor_absoluteX="30dp" />

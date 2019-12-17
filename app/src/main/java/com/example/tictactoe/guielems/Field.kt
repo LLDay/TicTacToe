@@ -1,5 +1,6 @@
 package com.example.tictactoe.guielems
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,8 @@ import com.example.tictactoe.GlobalParams.Companion.globalTag
 import com.example.tictactoe.R
 import com.example.tictactoe.logic.SessionListener
 import com.example.tictactoe.logic.Session
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class Field : Fragment(), SessionListener {
@@ -89,6 +92,16 @@ class Field : Fragment(), SessionListener {
     }
 
     override fun onGameEnd(status: Session.EndGameStatus) {
-        //TODO(popup or fragment)
+        activity!!.runOnUiThread {
+            val dialog = AlertDialog.Builder(this@Field.context)
+            when (status) {
+                Session.EndGameStatus.O_WON -> dialog.setTitle("O won!!!")
+                Session.EndGameStatus.X_WON -> dialog.setTitle("X won!!!")
+                Session.EndGameStatus.DRAW -> dialog.setTitle("Draw!")
+            }
+            dialog.setPositiveButton("OK!") {d, _ -> d.dismiss() }
+            dialog.show()
+        }
+
     }
 }
