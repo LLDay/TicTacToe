@@ -49,6 +49,13 @@ class MainMenu : AppCompatActivity() {
             intent.putExtra("Restore", true)
             startActivity(intent)
         }
+
+        findViewById<Button>(R.id.multiplayer_button).setOnClickListener {
+            val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("SessionType", GameActivity.SessionType.TWO_ON_TWO)
+            intent.putExtra("Restore", false)
+            startActivity(intent)
+        }
     }
 
     override fun onStart() {
@@ -58,6 +65,5 @@ class MainMenu : AppCompatActivity() {
 
         val continueButton = findViewById<Button>(R.id.continue_button)
         continueButton.isEnabled = (info != null && info.status == Session.GameStatus.CONTINUES)
-
     }
 }

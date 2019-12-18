@@ -48,7 +48,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
     fun getLastSession(): SessionInfo? {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME ORDER BY $ID DESC LIMIT 1;", null)
-        return if (cursor.moveToFirst()) {
+        return if (cursor.moveToLast()) {
             val historyStr = cursor.getString(cursor.getColumnIndex(STEPS))
             val statusInt = cursor.getInt(cursor.getColumnIndex(STATUS))
 

@@ -10,14 +10,14 @@ import com.example.tictactoe.GlobalParams.Companion.fieldSize
 import com.example.tictactoe.GlobalParams.Companion.winNumber
 import com.example.tictactoe.database.DatabaseHelper
 import com.example.tictactoe.database.SessionInfo
+import com.example.tictactoe.logic.players.APlayer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 
-class Session(player1: APlayer, player2: APlayer,
-              private val context: Context, private val restore: Boolean) : LifecycleObserver {
+class Session(private val context: Context, private val restore: Boolean) : LifecycleObserver {
 
     //
     // Properties and fields
@@ -43,21 +43,23 @@ class Session(player1: APlayer, player2: APlayer,
     val currentMove: CellStates
         get() = if (xMoves) CellStates.X else CellStates.O
 
-    var job: Job
+    private lateinit var job: Job
 
 
     //
     //  Lifecycle
     //
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun saveStateToDb() {
-        Log.d(globalTag, "Load to db")
-        val db = DatabaseHelper(context)
-        db.addNewSession(SessionInfo(history, gameStatus))
+        if (history.isNotEmpty()) {
+            val db = DatabaseHelper(context)
+            val id = db.addNewSession(SessionInfo(history, gameStatus))
+            Log.d(globalTag, "Load to db id: $id")
+        }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun restoreStateFromdb() {
         if (restore) {
             Log.d(globalTag, "Load from db")
@@ -70,13 +72,11 @@ class Session(player1: APlayer, player2: APlayer,
         }
     }
 
-
     //
     //  Global logic
     //
 
-
-    init {
+    fun startSession(player1: APlayer, player2: APlayer) {
         player1.addChannel(channel1)
         player2.addChannel(channel2)
 

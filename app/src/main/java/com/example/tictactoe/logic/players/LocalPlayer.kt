@@ -1,4 +1,4 @@
-package com.example.tictactoe.logic
+package com.example.tictactoe.logic.players
 
 import android.view.View
 import com.example.tictactoe.GlobalParams
