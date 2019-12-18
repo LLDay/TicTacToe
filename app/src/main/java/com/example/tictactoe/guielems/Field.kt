@@ -3,7 +3,6 @@ package com.example.tictactoe.guielems
 import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,12 +10,9 @@ import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import com.example.tictactoe.GameActivity
 import com.example.tictactoe.GlobalParams.Companion.fieldSize
-import com.example.tictactoe.GlobalParams.Companion.globalTag
 import com.example.tictactoe.R
 import com.example.tictactoe.logic.SessionListener
 import com.example.tictactoe.logic.Session
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class Field : Fragment(), SessionListener {
@@ -91,13 +87,13 @@ class Field : Fragment(), SessionListener {
         }
     }
 
-    override fun onGameEnd(status: Session.EndGameStatus) {
+    override fun onGameEnd(status: Session.GameStatus) {
         activity!!.runOnUiThread {
             val dialog = AlertDialog.Builder(this@Field.context)
             when (status) {
-                Session.EndGameStatus.O_WON -> dialog.setTitle("O won!!!")
-                Session.EndGameStatus.X_WON -> dialog.setTitle("X won!!!")
-                Session.EndGameStatus.DRAW -> dialog.setTitle("Draw!")
+                Session.GameStatus.O_WON -> dialog.setTitle("O won!!!")
+                Session.GameStatus.X_WON -> dialog.setTitle("X won!!!")
+                Session.GameStatus.DRAW -> dialog.setTitle("Draw!")
             }
             dialog.setPositiveButton("OK!") {d, _ -> d.dismiss() }
             dialog.show()

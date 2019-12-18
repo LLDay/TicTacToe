@@ -4,7 +4,6 @@ import com.example.tictactoe.guielems.Field
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import java.io.Serializable
 
 abstract class APlayer : SessionListener {
     protected val channels = mutableListOf<Channel<Pair<Int, Int>>>()
@@ -24,7 +23,7 @@ abstract class APlayer : SessionListener {
     override fun onMove(x: Int, y: Int, lastMove: Session.CellStates, status: Session.MoveStatus) {
     }
 
-    override fun onGameEnd(status: Session.EndGameStatus) {
+    override fun onGameEnd(status: Session.GameStatus) {
 
     }
 }

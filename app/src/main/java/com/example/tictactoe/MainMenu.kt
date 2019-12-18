@@ -1,14 +1,12 @@
 package com.example.tictactoe
 
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION
-import android.content.Intent.FLAG_ACTIVITY_NO_HISTORY
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatDelegate
-import com.example.tictactoe.logic.LocalPlayer
+import com.example.tictactoe.database.DatabaseHelper
 import com.example.tictactoe.logic.Session
 
 class MainMenu : AppCompatActivity() {
@@ -41,10 +39,25 @@ class MainMenu : AppCompatActivity() {
         findViewById<Button>(R.id.new_game_button).setOnClickListener {
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("SessionType", GameActivity.SessionType.TWO_ON_ONE)
+            intent.putExtra("Restore", false)
             startActivity(intent)
         }
 
+        findViewById<Button>(R.id.continue_button).setOnClickListener {
+            val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("SessionType", GameActivity.SessionType.TWO_ON_ONE)
+            intent.putExtra("Restore", true)
+            startActivity(intent)
+        }
+    }
 
+    override fun onStart() {
+        super.onStart()
+        val db = DatabaseHelper(this)
+        val info = db.getLastSession()
+
+        val continueButton = findViewById<Button>(R.id.continue_button)
+        continueButton.isEnabled = (info != null && info.status == Session.GameStatus.CONTINUES)
 
     }
 }

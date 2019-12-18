@@ -1,5 +1,6 @@
 package com.example.tictactoe.logic
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -7,14 +8,16 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.example.tictactoe.GlobalParams.Companion.globalTag
 import com.example.tictactoe.GlobalParams.Companion.fieldSize
 import com.example.tictactoe.GlobalParams.Companion.winNumber
+import com.example.tictactoe.database.DatabaseHelper
+import com.example.tictactoe.database.SessionInfo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import java.io.Serializable
 
 
-class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
+class Session(player1: APlayer, player2: APlayer,
+              private val context: Context, private val restore: Boolean) : LifecycleObserver {
 
     //
     // Properties and fields
@@ -27,10 +30,12 @@ class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
     private var xMoves = true
 
     private val cells = Array(fieldSize) { Array(fieldSize) { CellStates.SPACE } }
+    private val history = mutableListOf<Int>()
+    private var gameStatus = GameStatus.CONTINUES
 
     enum class CellStates { X, O, SPACE }
     enum class MoveStatus { OK, NO }
-    enum class EndGameStatus { DRAW, X_WON, O_WON}
+    enum class GameStatus { CONTINUES, DRAW, X_WON, O_WON }
 
     val lastMove: CellStates
         get() = if (xMoves) CellStates.O else CellStates.X
@@ -46,13 +51,23 @@ class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
     //
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun saveStateToDB() {
-        Log.d(globalTag, "Load from db")
+    private fun saveStateToDb() {
+        Log.d(globalTag, "Load to db")
+        val db = DatabaseHelper(context)
+        db.addNewSession(SessionInfo(history, gameStatus))
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun restoreStateFromDB() {
-        Log.d(globalTag, "Load to db")
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private fun restoreStateFromdb() {
+        if (restore) {
+            Log.d(globalTag, "Load from db")
+            val db = DatabaseHelper(context)
+            val info = db.getLastSession() ?: return
+
+            info.steps.forEach {
+                moveTo(it % fieldSize, it / fieldSize)
+            }
+        }
     }
 
 
@@ -106,30 +121,32 @@ class Session(player1: APlayer, player2: APlayer) : LifecycleObserver {
 
         cells[x][y] = currentMove
         xMoves = !xMoves
+        history.add(fieldSize * y + x)
 
         Log.d(globalTag, "Move $lastMove at $x:$y")
         moveListeners.forEach { it.onMove(x, y, lastMove, MoveStatus.OK) }
     }
 
     private fun tryEndGame(x: Int, y: Int) {
-        var endStatus: EndGameStatus?
+        var endStatus: GameStatus?
         endStatus = null
 
         if (isDraw()) {
             Log.d(globalTag, "Draw")
-            endStatus = EndGameStatus.DRAW
+            endStatus = GameStatus.DRAW
         }
 
         if (isSomeoneWins(x, y)) {
             Log.d(globalTag, "$lastMove won")
             endStatus = when (lastMove) {
-                CellStates.X -> EndGameStatus.X_WON
-                CellStates.O -> EndGameStatus.O_WON
+                CellStates.X -> GameStatus.X_WON
+                CellStates.O -> GameStatus.O_WON
                 else -> throw IllegalStateException("Current move cannot be undefined")
             }
         }
 
         if (endStatus != null) {
+            gameStatus = endStatus
             job.cancel()
             moveListeners.forEach { it.onGameEnd(endStatus) }
         }

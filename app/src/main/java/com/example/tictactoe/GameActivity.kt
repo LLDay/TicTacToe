@@ -37,7 +37,8 @@ class GameActivity : AppCompatActivity(), LifecycleOwner {
             }
         }
 
-        session = Session(player1, player2)
+        val restore = intent.getBooleanExtra("Restore", false)
+        session = Session(player1, player2, this, restore)
         lifecycle.addObserver(session)
     }
 
