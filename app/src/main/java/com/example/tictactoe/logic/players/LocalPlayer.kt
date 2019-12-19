@@ -5,7 +5,7 @@ import com.example.tictactoe.GlobalParams
 import com.example.tictactoe.guielems.Field
 
 
-class LocalPlayer : APlayer() {
+open class LocalPlayer : APlayer() {
     
     override fun connectField(field: Field) {
         for (i in 0 until field.cells.size) {

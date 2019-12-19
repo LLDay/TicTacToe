@@ -1,4 +1,7 @@
 package com.example.tictactoe.logic.players
 
-class ANetPlayer {
+import android.content.Context
+
+class ANetPlayer(context: Context): APlayer() {
+
 }

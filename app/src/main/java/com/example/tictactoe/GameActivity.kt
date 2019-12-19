@@ -37,8 +37,19 @@ class GameActivity : AppCompatActivity(), LifecycleOwner {
             }
             SessionType.TWO_ON_TWO -> {
                 player1 = NetPlayer(this)
-                player2 = RemoteNetPlayer()
+                player2 = player1
             }
+            /*
+            FUTURE
+            SessionType.ONE_AI -> {
+                player1 = LocalPlayer()
+                player2 = AiPlayer()
+            }
+            SessoinType.AI_AI -> {
+                player1 = AiPlayer()
+                player2 = AiPlayer()
+            }
+             */
         }
 
         val restore = intent.getBooleanExtra("Restore", false)

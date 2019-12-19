@@ -11,10 +11,11 @@ import kotlinx.coroutines.launch
 abstract class APlayer : SessionListener, LifecycleObserver {
     protected val channels = mutableListOf<Channel<Pair<Int, Int>>>()
 
-    fun move(x: Int, y: Int) =
+    open fun move(x: Int, y: Int) {
         GlobalScope.launch {
             channels.forEach { it.offer(Pair(x, y)) }
         }
+    }
 
     fun addChannel(channel: Channel<Pair<Int, Int>>) {
         channels.add(channel)

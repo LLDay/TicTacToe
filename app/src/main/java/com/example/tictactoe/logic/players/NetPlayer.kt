@@ -3,6 +3,7 @@ package com.example.tictactoe.logic.players
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -18,13 +19,15 @@ import com.google.android.gms.nearby.connection.*
 import java.nio.charset.StandardCharsets.UTF_8
 
 
-class NetPlayer(private val context: Context): APlayer() {
+class NetPlayer(private val context: Context): LocalPlayer() {
 
-    private var connectionsClient: ConnectionsClient? = null
+    private lateinit var connectionsClient: ConnectionsClient
     private val codeName: String = "name"
 
-    private var opponentEndpointId: String? = null
-    private var opponentName: String? = null
+    private lateinit var opponentEndpointId: String
+    private lateinit var opponentName: String
+
+    private var isConnected = false
 
     // Callbacks for receiving payloads
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
@@ -40,113 +43,112 @@ class NetPlayer(private val context: Context): APlayer() {
     // Callbacks for finding other devices
     private val endpointDiscoveryCallback: EndpointDiscoveryCallback =
         object : EndpointDiscoveryCallback() {
-            override fun onEndpointFound(
-                endpointId: String,
-                info: DiscoveredEndpointInfo
-            ) {
+            override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
                 Log.i(globalTag, "onEndpointFound: endpoint found, connecting")
-                connectionsClient!!.requestConnection(
-                    codeName,
-                    endpointId,
+                connectionsClient.requestConnection(
+                    codeName, endpointId,
                     connectionLifecycleCallback
                 )
             }
 
-            override fun onEndpointLost(endpointId: String) {}
+            override fun onEndpointLost(endpointId: String) {
+                Log.i(globalTag, "Endpoint lost")
+            }
         }
 
     private val connectionLifecycleCallback: ConnectionLifecycleCallback =
         object : ConnectionLifecycleCallback() {
-            override fun onConnectionInitiated(
-                endpointId: String,
-                connectionInfo: ConnectionInfo
-            ) {
+            override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
                 Log.i(globalTag, "onConnectionInitiated: accepting connection")
-                connectionsClient!!.acceptConnection(endpointId, payloadCallback)
+                connectionsClient.acceptConnection(endpointId, payloadCallback)
                 opponentName = connectionInfo.endpointName
             }
 
-            override fun onConnectionResult(
-                endpointId: String,
-                result: ConnectionResolution
-            ) {
+            override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
+                Log.d(globalTag, "Connection status: ${result.status.statusMessage}")
                 if (result.status.isSuccess) {
                     Log.i(globalTag, "onConnectionResult: connection successful")
-                    connectionsClient!!.stopDiscovery()
-                    connectionsClient!!.stopAdvertising()
+                    connectionsClient.stopDiscovery()
+                    connectionsClient.stopAdvertising()
                     opponentEndpointId = endpointId
-                } else {
-                    Log.i(globalTag, "onConnectionResult: connection failed")
+                    isConnected = true
                 }
+                else
+                    Log.i(globalTag, "onConnectionResult: connection failed")
             }
 
             override fun onDisconnected(endpointId: String) {
                 Log.i(globalTag, "onDisconnected: disconnected from the opponent")
+                isConnected = false
             }
         }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    protected fun onCreate() {
+    private fun onCreate() {
         connectionsClient = Nearby.getConnectionsClient(context)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    protected fun onActivityStart() {
+    private fun onActivityStart() {
         if (android.os.Build.VERSION.SDK_INT >= 23) {
             REQUIRED_PERMISSIONS.forEach {
                 if (!hasPermissions(context, it)) {
-                    requestPermissions(context as GameActivity,
-                        REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS)
+                    requestPermissions(
+                        context as GameActivity,
+                        REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS
+                    )
                 }
             }
         }
+
+//        startAdvertising()
+        startDiscovering()
     }
+
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStopActivity() {
-        connectionsClient!!.stopAllEndpoints()
+        Log.d(globalTag, "Stop all endpoints")
+        connectionsClient.stopAllEndpoints()
     }
 
-    /** Returns true if the app was granted all the permissions. Otherwise, returns false.  */
-    private fun hasPermissions(
-        context: Context,
-        vararg permissions: String
-    ): Boolean {
-        for (permission in permissions) {
+    private fun hasPermissions(context: Context, vararg permissions: String): Boolean {
+        for (permission in permissions)
             if (ContextCompat.checkSelfPermission(context, permission)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
+                != PackageManager.PERMISSION_GRANTED)
                 return false
-            }
-        }
         return true
     }
 
-    /** Finds an opponent to play the game with using Nearby Connections.  */
-    fun findOpponent() {
-        startAdvertising()
-        startDiscovery()
-    }
-
-    private fun startDiscovery() { // Note: Discovery may fail. To keep this demo simple, we don't handle failures.
-        connectionsClient!!.startDiscovery(
+    private fun startDiscovering() {
+        Log.d(globalTag, "Start discovering")
+        connectionsClient.startDiscovery(
             context.packageName, endpointDiscoveryCallback,
             DiscoveryOptions.Builder().setStrategy(STRATEGY).build()
         )
     }
 
-    /** Broadcasts our presence using Nearby Connections so other players can find us.  */
-    private fun startAdvertising() { // Note: Advertising may fail. To keep this demo simple, we don't handle failures.
-        connectionsClient!!.startAdvertising(
+    private fun startAdvertising() {
+        Log.d(globalTag, "Start advertising")
+        connectionsClient.startAdvertising(
             codeName, context.packageName, connectionLifecycleCallback,
             AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
         )
     }
 
-    /** Sends the user's selection of rock, paper, or scissors to the opponent.  */
-    private fun sendGameChoice(move: Int) {
-        connectionsClient!!.sendPayload(
-            opponentEndpointId!!, Payload.fromBytes(move.toString().toByteArray(UTF_8)))
+
+    override fun move(x: Int, y: Int) {
+        if (isConnected) {
+            super.move(x, y)
+            val m = y * fieldSize + x
+            connectionsClient.sendPayload(
+                    opponentEndpointId,
+                    Payload.fromBytes(m.toString().toByteArray(UTF_8))
+                )
+        }
+        else {
+            Toast.makeText(context, "Player is not connected", Toast.LENGTH_SHORT).show()
+        }
     }
 
 }

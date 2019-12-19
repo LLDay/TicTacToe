@@ -17,7 +17,7 @@ class GlobalParams {
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
 
-        val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
-        val STRATEGY = Strategy.P2P_STAR
+        const val REQUEST_CODE_REQUIRED_PERMISSIONS = 1
+        val STRATEGY = Strategy.P2P_POINT_TO_POINT
     }
 }
