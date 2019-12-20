@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 abstract class APlayer : SessionListener, LifecycleObserver {
-    protected val channels = mutableListOf<Channel<Pair<Int, Int>>>()
+    private val channels = mutableListOf<Channel<Pair<Int, Int>>>()
 
     open fun move(x: Int, y: Int) {
         GlobalScope.launch {

@@ -4,11 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LifecycleOwner
-import com.example.tictactoe.logic.players.APlayer
-import com.example.tictactoe.logic.players.LocalPlayer
 import com.example.tictactoe.logic.Session
-import com.example.tictactoe.logic.players.NetPlayer
-import com.example.tictactoe.logic.players.RemoteNetPlayer
+import com.example.tictactoe.logic.players.*
 
 class GameActivity : AppCompatActivity(), LifecycleOwner {
 
@@ -36,8 +33,13 @@ class GameActivity : AppCompatActivity(), LifecycleOwner {
                 player2 = player1
             }
             SessionType.TWO_ON_TWO -> {
-                player1 = NetPlayer(this)
-                player2 = player1
+                val net = NearbyNetwork(this)
+                lifecycle.addObserver(net)
+
+                player1 = NetPlayer(this, net)
+                player2 = RemoteNetPlayer(net)
+
+                net.addReceiver(player1)
             }
             /*
             FUTURE

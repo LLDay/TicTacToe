@@ -9,17 +9,17 @@ open class LocalPlayer : APlayer() {
     
     override fun connectField(field: Field) {
         for (i in 0 until field.cells.size) {
-            field.cells[i].setOnClickListener(CellClickListener(i))
+            field.cells[i].setOnClickListener(CellClickListener(this, i))
         }
     }
 
-    private inner class CellClickListener(absPos: Int)
+    private inner class CellClickListener(private val player: APlayer, absPos: Int)
         : View.OnClickListener {
         private val posX = absPos % GlobalParams.fieldSize
         private val posY = absPos / GlobalParams.fieldSize
 
         override fun onClick(v: View?) {
-            this@LocalPlayer.move(posX, posY)
+            player.move(posX, posY)
         }
     }
 
